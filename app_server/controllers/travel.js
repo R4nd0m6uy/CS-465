@@ -1,12 +1,37 @@
-const fs = require('fs');
+const apiOptions = {
+  server: 'http://localhost:3000'
+};
 
-const trips = JSON.parse(fs.readFileSync('./data/trips.json', 'utf8'));
+const renderTravelPage = (req, res, responseBody) => {
+  let message = null;
+  let trips = responseBody;
 
-const travel = (req, res) => {
+  if (!(trips instanceof Array)) {
+    message = 'API lookup error';
+    trips = [];
+  } else if (!trips.length) {
+    message = 'No trips exist in the database';
+  }
+
   res.render('travel', {
     title: 'Travlr Getaways',
-    trips
+    trips,
+    message
   });
+};
+
+const travel = async (req, res) => {
+  const path = '/api/trips';
+  const url = `${apiOptions.server}${path}`;
+
+  try {
+    const response = await fetch(url, { method: 'GET' });
+    const json = await response.json();
+
+    renderTravelPage(req, res, json);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
 };
 
 module.exports = {
