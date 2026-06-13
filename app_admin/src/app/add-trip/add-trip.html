@@ -1,0 +1,58 @@
+<h1>Add Trip</h1>
+
+<div *ngIf="message" class="alert alert-danger">
+  {{ message }}
+</div>
+
+<form #addForm="ngForm" (ngSubmit)="onSubmit()" class="row g-3">
+  <div class="col-md-4">
+    <label class="form-label">Code</label>
+    <input class="form-control" name="code" [(ngModel)]="trip.code" required>
+  </div>
+
+  <div class="col-md-8">
+    <label class="form-label">Name</label>
+    <input class="form-control" name="name" [(ngModel)]="trip.name" required>
+  </div>
+
+  <div class="col-md-4">
+    <label class="form-label">Length</label>
+    <input class="form-control" name="length" [(ngModel)]="trip.length" required>
+  </div>
+
+  <div class="col-md-4">
+    <label class="form-label">Start Date</label>
+    <input class="form-control" type="date" name="start" [(ngModel)]="trip.start" required>
+  </div>
+
+  <div class="col-md-4">
+    <label class="form-label">Price Per Person</label>
+    <input class="form-control" name="perPerson" [(ngModel)]="trip.perPerson" required>
+  </div>
+
+  <div class="col-md-6">
+    <label class="form-label">Resort</label>
+    <input class="form-control" name="resort" [(ngModel)]="trip.resort" required>
+  </div>
+
+  <div class="col-md-6">
+    <label class="form-label">Image</label>
+    <select class="form-select" name="image" [(ngModel)]="trip.image" required>
+      <option value="reef1.jpg">reef1.jpg</option>
+      <option value="reef2.jpg">reef2.jpg</option>
+      <option value="reef3.jpg">reef3.jpg</option>
+    </select>
+  </div>
+
+  <div class="col-12">
+    <label class="form-label">Description</label>
+    <textarea class="form-control" name="description" [(ngModel)]="trip.description" rows="4" required></textarea>
+  </div>
+
+  <div class="col-12">
+    <button class="btn btn-success" type="submit" [disabled]="addForm.invalid">
+      Add Trip
+    </button>
+    <a class="btn btn-secondary ms-2" routerLink="/">Cancel</a>
+  </div>
+</form>
