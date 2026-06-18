@@ -1,12 +1,24 @@
 import { Injectable } from '@angular/core';
 
 import { Trip } from '../models/trip';
+import { AuthenticationService } from './authentication.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TripDataService {
   private apiBaseUrl = 'http://localhost:3000/api';
+
+  constructor(private authService: AuthenticationService) {}
+
+  private authHeaders(): HeadersInit {
+    const token = this.authService.getToken();
+
+    return {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    };
+  }
 
   async getTrips(): Promise<Trip[]> {
     const response = await fetch(`${this.apiBaseUrl}/trips?_=${Date.now()}`);
@@ -31,9 +43,7 @@ export class TripDataService {
   async addTrip(trip: Trip): Promise<Trip> {
     const response = await fetch(`${this.apiBaseUrl}/trips`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: this.authHeaders(),
       body: JSON.stringify(trip)
     });
 
@@ -47,9 +57,7 @@ export class TripDataService {
   async updateTrip(trip: Trip): Promise<Trip> {
     const response = await fetch(`${this.apiBaseUrl}/trips/${trip.code}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: this.authHeaders(),
       body: JSON.stringify(trip)
     });
 
@@ -62,7 +70,8 @@ export class TripDataService {
 
   async deleteTrip(tripCode: string): Promise<void> {
     const response = await fetch(`${this.apiBaseUrl}/trips/${tripCode}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: this.authHeaders()
     });
 
     if (!response.ok) {

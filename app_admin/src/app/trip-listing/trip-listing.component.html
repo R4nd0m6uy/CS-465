@@ -1,6 +1,12 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h1>Trip Listing</h1>
-  <a class="btn btn-primary" routerLink="/add-trip">Add Trip</a>
+
+  <a
+    class="btn btn-primary"
+    routerLink="/add-trip"
+    *ngIf="authService.isLoggedIn()">
+    Add Trip
+  </a>
 </div>
 
 <div *ngIf="message" class="alert alert-danger">

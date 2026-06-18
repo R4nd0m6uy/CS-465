@@ -26,7 +26,7 @@
     </p>
   </div>
 
-  <div class="card-footer d-flex gap-2">
+  <div class="card-footer d-flex gap-2" *ngIf="authService.isLoggedIn()">
     <a class="btn btn-sm btn-warning" [routerLink]="['/edit-trip', trip.code]">
       Edit
     </a>
