@@ -55,7 +55,3 @@ This course helped me better understand how the different parts of a full stack 
 I developed experience with Express, Node.js, MongoDB, Angular, REST APIs, and authentication. I also gained more practice troubleshooting issues across multiple layers of an application. For example, a problem might come from the Angular frontend, the API route, the controller logic, the database model, or the security token. Learning how to trace those problems made me more comfortable working through real-world development issues.
 
 This course also helped me build skills that are useful for my professional goals in technology and security. Understanding how APIs, authentication, tokens, and frontend/backend communication work is valuable for both software development and cybersecurity. The final project gave me a portfolio-ready example of a full stack application with public features, admin CRUD functionality, and secure login authentication.
-
-## Repository
-
-GitHub Repository: https://github.com/R4nd0m6uy/CS-465
