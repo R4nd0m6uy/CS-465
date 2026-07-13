@@ -1,0 +1,38 @@
+<div class="card h-100">
+  <div class="card-header fw-bold">
+    {{ trip.name }}
+  </div>
+
+  <img
+    src="/assets/images/{{ trip.image }}"
+    alt="{{ trip.name }}"
+    class="card-img-top">
+
+  <div class="card-body">
+    <h6 class="card-subtitle mb-2 text-muted">
+      {{ trip.resort }}
+    </h6>
+
+    <p class="card-text">
+      {{ trip.length }} only {{ trip.perPerson | currency:'USD':'symbol' }} per person
+    </p>
+
+    <p class="card-text">
+      {{ trip.description }}
+    </p>
+
+    <p class="card-text">
+      <small class="text-muted">Trip Code: {{ trip.code }}</small>
+    </p>
+  </div>
+
+  <div class="card-footer d-flex gap-2" *ngIf="authService.isLoggedIn()">
+    <a class="btn btn-sm btn-warning" [routerLink]="['/edit-trip', trip.code]">
+      Edit
+    </a>
+
+    <button class="btn btn-sm btn-danger" type="button" (click)="requestDelete()">
+      Delete
+    </button>
+  </div>
+</div>
