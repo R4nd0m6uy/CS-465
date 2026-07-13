@@ -5,6 +5,7 @@ const ctrlTrips = require('../controllers/trips');
 const ctrlAuth = require('../controllers/authentication');
 
 const authenticateJWT = require('../middleware/authenticateJWT');
+const validateTrip = require('../middleware/validateTrip');
 
 router
   .route('/register')
@@ -17,12 +18,12 @@ router
 router
   .route('/trips')
   .get(ctrlTrips.tripsList)
-  .post(authenticateJWT, ctrlTrips.tripsAddTrip);
+  .post(authenticateJWT, validateTrip, ctrlTrips.tripsAddTrip);
 
 router
   .route('/trips/:tripCode')
   .get(ctrlTrips.tripsFindByCode)
-  .put(authenticateJWT, ctrlTrips.tripsUpdateTrip)
+  .put(authenticateJWT, validateTrip, ctrlTrips.tripsUpdateTrip)
   .delete(authenticateJWT, ctrlTrips.tripsDeleteTrip);
 
 module.exports = router;
