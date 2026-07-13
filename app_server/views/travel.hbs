@@ -1,0 +1,33 @@
+<div id="page">
+  {{> header}}
+
+  <div id="contents">
+    <div class="box">
+      <div>
+        <div class="body">
+          <h1>Travel</h1>
+          <ul id="sites">
+            {{#each trips}}
+            <li>
+              <a href="/api/trips/{{this.code}}"><img src="/images/{{this.image}}" alt="{{this.name}}"></a>
+              <h2><a href="/api/trips/{{this.code}}">{{this.name}}</a></h2>
+              <p>
+                {{this.description}}
+              </p>
+              <p>
+                <strong>Trip Code:</strong> {{this.code}}<br>
+                <strong>Length:</strong> {{this.length}}<br>
+                <strong>Start Date:</strong> {{this.start}}<br>
+                <strong>Resort:</strong> {{this.resort}}<br>
+                <strong>Per Person:</strong> ${{this.perPerson}}
+              </p>
+            </li>
+            {{/each}}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{> footer}}
