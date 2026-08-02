@@ -1,5 +1,65 @@
 const mongoose = require('mongoose');
+require('../models/auditLog');
+
 const Trip = mongoose.model('trips');
+const AuditLog = mongoose.model('auditlogs');
+
+const buildTripPayload = (req) => ({
+  code: req.body.code,
+  name: req.body.name,
+  length: req.body.length,
+  start: req.body.start,
+  resort: req.body.resort,
+  perPerson: req.body.perPerson,
+  image: req.body.image,
+  description: req.body.description
+});
+
+const toPlainObject = (document) => {
+  if (!document) {
+    return null;
+  }
+
+  if (typeof document.toObject === 'function') {
+    return document.toObject();
+  }
+
+  return document;
+};
+
+const getRequestActor = (req) => {
+  if (req.auth) {
+    return req.auth.email || req.auth.name || req.auth.id || req.auth._id || 'authenticated-user';
+  }
+
+  return 'unknown';
+};
+
+const recordTripAudit = async (req, action, beforeTrip, afterTrip) => {
+  const before = toPlainObject(beforeTrip);
+  const after = toPlainObject(afterTrip);
+  const referenceTrip = after || before;
+
+  try {
+    await AuditLog.create({
+      action,
+      collectionName: 'trips',
+      documentId: referenceTrip && referenceTrip._id ? referenceTrip._id : undefined,
+      tripCode: referenceTrip && referenceTrip.code ? referenceTrip.code : req.params.tripCode,
+      performedBy: getRequestActor(req),
+      before,
+      after,
+      metadata: {
+        method: req.method,
+        route: req.originalUrl,
+        ip: req.ip,
+        userAgent: req.get('user-agent')
+      }
+    });
+  } catch (auditErr) {
+    console.error('Audit log write failed:', auditErr.message);
+  }
+};
 
 // GET: /api/trips
 const tripsList = async (req, res) => {
@@ -46,16 +106,9 @@ const tripsFindByCode = async (req, res) => {
 // POST: /api/trips
 const tripsAddTrip = async (req, res) => {
   try {
-    const newTrip = await Trip.create({
-      code: req.body.code,
-      name: req.body.name,
-      length: req.body.length,
-      start: req.body.start,
-      resort: req.body.resort,
-      perPerson: req.body.perPerson,
-      image: req.body.image,
-      description: req.body.description
-    });
+    const newTrip = await Trip.create(buildTripPayload(req));
+
+    await recordTripAudit(req, 'CREATE', null, newTrip);
 
     return res.status(201).json(newTrip);
   } catch (err) {
@@ -75,27 +128,22 @@ const tripsUpdateTrip = async (req, res) => {
       return res.status(400).json({ message: 'Trip code is required' });
     }
 
+    const existingTrip = await Trip.findOne({ code: tripCode }).exec();
+
+    if (!existingTrip) {
+      return res.status(404).json({ message: `Trip code ${tripCode} not found` });
+    }
+
     const updatedTrip = await Trip.findOneAndUpdate(
       { code: tripCode },
-      {
-        code: req.body.code,
-        name: req.body.name,
-        length: req.body.length,
-        start: req.body.start,
-        resort: req.body.resort,
-        perPerson: req.body.perPerson,
-        image: req.body.image,
-        description: req.body.description
-      },
+      buildTripPayload(req),
       {
         new: true,
         runValidators: true
       }
     ).exec();
 
-    if (!updatedTrip) {
-      return res.status(404).json({ message: `Trip code ${tripCode} not found` });
-    }
+    await recordTripAudit(req, 'UPDATE', existingTrip, updatedTrip);
 
     return res.status(200).json(updatedTrip);
   } catch (err) {
@@ -120,6 +168,8 @@ const tripsDeleteTrip = async (req, res) => {
     if (!deletedTrip) {
       return res.status(404).json({ message: `Trip code ${tripCode} not found` });
     }
+
+    await recordTripAudit(req, 'DELETE', deletedTrip, null);
 
     return res.status(200).json({
       message: `Trip code ${tripCode} deleted`,
