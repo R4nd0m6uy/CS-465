@@ -35,6 +35,52 @@ const getRequestActor = (req) => {
   return 'unknown';
 };
 
+const formatDatabaseError = (err, action) => {
+  if (err && err.code === 11000) {
+    return {
+      status: 409,
+      body: {
+        message: `Duplicate database value while ${action}`,
+        code: 'DUPLICATE_KEY',
+        fields: Object.keys(err.keyValue || {}),
+        error: err.message
+      }
+    };
+  }
+
+  if (err && err.name === 'ValidationError') {
+    return {
+      status: 400,
+      body: {
+        message: `Database validation failed while ${action}`,
+        code: 'VALIDATION_ERROR',
+        errors: Object.values(err.errors || {}).map((item) => item.message)
+      }
+    };
+  }
+
+  if (err && err.name === 'CastError') {
+    return {
+      status: 400,
+      body: {
+        message: `Invalid database value while ${action}`,
+        code: 'CAST_ERROR',
+        field: err.path,
+        value: err.value
+      }
+    };
+  }
+
+  return {
+    status: 500,
+    body: {
+      message: `Database error while ${action}`,
+      code: 'DATABASE_ERROR',
+      error: err.message
+    }
+  };
+};
+
 const recordTripAudit = async (req, action, beforeTrip, afterTrip) => {
   const before = toPlainObject(beforeTrip);
   const after = toPlainObject(afterTrip);
@@ -72,10 +118,8 @@ const tripsList = async (req, res) => {
 
     return res.status(200).json(trips);
   } catch (err) {
-    return res.status(500).json({
-      message: 'Error retrieving trips',
-      error: err.message
-    });
+    const dbError = formatDatabaseError(err, 'retrieving trips');
+    return res.status(dbError.status).json(dbError.body);
   }
 };
 
@@ -96,10 +140,8 @@ const tripsFindByCode = async (req, res) => {
 
     return res.status(200).json(trip);
   } catch (err) {
-    return res.status(500).json({
-      message: 'Error retrieving trip',
-      error: err.message
-    });
+    const dbError = formatDatabaseError(err, 'retrieving trip');
+    return res.status(dbError.status).json(dbError.body);
   }
 };
 
@@ -112,10 +154,8 @@ const tripsAddTrip = async (req, res) => {
 
     return res.status(201).json(newTrip);
   } catch (err) {
-    return res.status(400).json({
-      message: 'Error creating trip',
-      error: err.message
-    });
+    const dbError = formatDatabaseError(err, 'creating trip');
+    return res.status(dbError.status).json(dbError.body);
   }
 };
 
@@ -147,10 +187,8 @@ const tripsUpdateTrip = async (req, res) => {
 
     return res.status(200).json(updatedTrip);
   } catch (err) {
-    return res.status(400).json({
-      message: 'Error updating trip',
-      error: err.message
-    });
+    const dbError = formatDatabaseError(err, 'updating trip');
+    return res.status(dbError.status).json(dbError.body);
   }
 };
 
@@ -176,10 +214,8 @@ const tripsDeleteTrip = async (req, res) => {
       trip: deletedTrip
     });
   } catch (err) {
-    return res.status(500).json({
-      message: 'Error deleting trip',
-      error: err.message
-    });
+    const dbError = formatDatabaseError(err, 'deleting trip');
+    return res.status(dbError.status).json(dbError.body);
   }
 };
 
