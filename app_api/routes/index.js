@@ -3,6 +3,7 @@ const router = express.Router();
 
 const ctrlTrips = require('../controllers/trips');
 const ctrlAuth = require('../controllers/authentication');
+const ctrlAuditLogs = require('../controllers/auditLogs');
 
 const authenticateJWT = require('../middleware/authenticateJWT');
 const validateTrip = require('../middleware/validateTrip');
@@ -25,5 +26,14 @@ router
   .get(ctrlTrips.tripsFindByCode)
   .put(authenticateJWT, validateTrip, ctrlTrips.tripsUpdateTrip)
   .delete(authenticateJWT, ctrlTrips.tripsDeleteTrip);
+
+
+router
+  .route('/audit/trips')
+  .get(authenticateJWT, ctrlAuditLogs.auditLogsList);
+
+router
+  .route('/audit/trips/:tripCode')
+  .get(authenticateJWT, ctrlAuditLogs.auditLogsFindByTripCode);
 
 module.exports = router;
