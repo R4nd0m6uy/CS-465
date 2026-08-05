@@ -178,7 +178,7 @@ const tripsUpdateTrip = async (req, res) => {
       { code: tripCode },
       buildTripPayload(req),
       {
-        new: true,
+        returnDocument: 'after',
         runValidators: true
       }
     ).exec();
